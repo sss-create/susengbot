@@ -11,7 +11,9 @@ import Network.HTTP.Simple
 import Network.HTTP.Conduit
 import Database.SQLite.Simple
 
+
 data Cat = Cat {cat_id :: String, url :: String} deriving Show
+
 
 instance FromJSON Cat where
     parseJSON (Object v) =
@@ -19,8 +21,10 @@ instance FromJSON Cat where
             <*> v .: "url"
     parseJSON _ = mzero
 
+
 telegramUrl :: String
 telegramUrl = "https://api.telegram.org/bot"
+
 
 readToken :: IO String
 readToken = do
@@ -29,6 +33,7 @@ readToken = do
     hClose handle
     return token
 
+
 sendPhoto :: String -> String -> IO ()
 sendPhoto token url = do
     request <- parseRequest $ telegramUrl ++ token ++ "/sendPhoto"
@@ -36,17 +41,20 @@ sendPhoto token url = do
     response <- httpLBS $ urlEncodedBody payload request
     print response
 
+
 storeCat :: String -> String -> IO ()
 storeCat catId url = do
     conn <- open "data/cats.db"
     date <- getCurrentTime
     execute conn "INSERT INTO cats (id, url, date_added) VALUES (?, ?, ?)" (catId, url, date)
 
+
 checkForEntry :: String -> IO Bool
 checkForEntry catId = do
     conn <- open "data/cats.db"
     result <- query conn "SELECT id FROM cats WHERE id = ?" (Only catId) :: IO [Only String]
     return (not (null result))
+
 
 main :: IO ()
 main = do
