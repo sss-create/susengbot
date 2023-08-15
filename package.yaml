@@ -1,0 +1,27 @@
+name:                susengbot
+version:             0.1.0.0
+#synopsis:
+#description:
+homepage:            https://github.com/githubuser/susengbot#readme
+license:             BSD3
+author:              Sven Miesner
+maintainer:          example@example.com
+copyright:           2023 Sven Miesner
+category:            Web
+extra-source-files:
+- README.md
+
+dependencies:
+  - base
+  - http-client-tls
+  - http-client
+  - http-conduit
+  - bytestring
+  - aeson
+  - utf8-string
+  - time
+  - sqlite-simple
+executables:
+  susengbot:
+    source-dirs:      src
+    main:             Main.hs
