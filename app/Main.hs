@@ -17,8 +17,8 @@ import System.IO
 
 
 data Cat = Cat 
-  { catId :: String
-  , url   :: String
+  { catId :: !String
+  , url   :: !String
   } deriving Show
 
 
@@ -62,17 +62,17 @@ checkForEntry catId = do
 
 
 handleCat :: String -> Cat -> IO ()
-handleCat token cat  = do
-  isInData <- checkForEntry (catId cat)
+handleCat token (Cat catId catUrl) = do
+  isInData <- checkForEntry catId
   if isInData then main
-  else sendPhoto token (url cat) >> storeCat (catId cat) (url cat)
+  else sendPhoto token catUrl >> storeCat catId catUrl
 
 
 main :: IO ()
 main = do
   token <- readToken
   response <- httpLBS "https://api.thecatapi.com/v1/images/search"
-  let catResponse = decode $ getResponseBody response :: Maybe [Cat]
+  let catResponse = decode $ getResponseBody response
 
   case catResponse of
     Just (cat:_) -> handleCat token cat

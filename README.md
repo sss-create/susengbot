@@ -1,4 +1,4 @@
-# Susengbot
+# susengbot
 Simple Telegram bot for displaying cute cat images
 written in Haskell.
 
@@ -9,7 +9,7 @@ Use with private bot token in ```data/token.txt```.
 Create a Database in ```data/```.
 Insert the desired ```chat_id``` in ```sendPhoto```.
 
-Susengbot uses SQLite3 for storing image id and url.
+susengbot uses SQLite3 for storing image id and url.
 The Database table is created via the following command:
 
 ```
@@ -27,7 +27,7 @@ compile and add a cronjob for a daily picture:
 Developed/Tested with:
 ```
 ghc 9.4.5
-stack 2.11.1
+cabal 3.6.2.0
 SQLite 3.40.1-2 
 zlib1g-dev version 1:1.2.13
 gcc-12.2.0-14
