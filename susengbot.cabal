@@ -1,12 +1,7 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.35.2.
---
--- see: https://github.com/sol/hpack
-
 name:           susengbot
 version:        0.1.0.0
-category:       Web
 homepage:       https://github.com/githubuser/susengbot#readme
 author:         Sven Miesner
 maintainer:     example@example.com
@@ -14,15 +9,12 @@ copyright:      2023 Sven Miesner
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
-extra-source-files:
-    README.md
+extra-source-files: README.md
 
 executable susengbot
   main-is: Main.hs
-  other-modules:
-      Paths_susengbot
   hs-source-dirs:
-      src
+      app
   build-depends:
       aeson
     , base
