@@ -2,78 +2,85 @@
 
 module Main where
 
-import Network.HTTP.Simple
-import Network.HTTP.Conduit
 
 import Database.SQLite.Simple
 
-import Data.Aeson
-import Data.ByteString.UTF8 (fromString)
+import Network.HTTP.Client
+import Network.HTTP.Client.OpenSSL
+
+import Data.Aeson.Micro
+
+import Data.ByteString.Char8 as B hiding (null)
 import Data.ByteString.Lazy (LazyByteString)
+
+import qualified Data.Text as T
+import Data.Text.Encoding (encodeUtf8)
+
 import Data.Time (getCurrentTime)
 
-import Control.Monad (mzero)
 import System.IO
 
 
-data Cat = Cat 
-  { catId :: !String
-  , url   :: !String
+data Cat = Cat
+  { catId :: !T.Text
+  , url   :: !T.Text
   } deriving Show
 
 
 instance FromJSON Cat where
-  parseJSON (Object v) = 
+  parseJSON (Object v) =
     Cat <$> v .: "id"
         <*> v .: "url"
-  parseJSON _ = mzero
+  parseJSON _ = fail "json parse err"
 
 
-telegramUrl :: String
+telegramUrl :: B.ByteString
 telegramUrl = "https://api.telegram.org/bot"
 
 
-readToken :: IO String
-readToken = do
-  handle <- openFile "data/token.txt" ReadMode
-  token <- hGetLine handle
-  hClose handle >> pure token
+readToken :: IO B.ByteString
+readToken = withFile "data/token.txt" ReadMode B.hGetLine
 
 
-sendPhoto :: String -> String -> IO (Response LazyByteString)
+sendPhoto :: B.ByteString -> B.ByteString -> IO (Response LazyByteString)
 sendPhoto token url = do
-  request <- parseRequest $ telegramUrl ++ token ++ "/sendPhoto"
-  let payload = [("chat_id", "1234"), ("photo", fromString url)]
-  httpLBS $ urlEncodedBody payload request
+  manager <- newOpenSSLManager
+  initRequest <- parseRequest $ B.unpack (telegramUrl <> token <> "/sendPhoto")
+  let body = [("chat_id", "1234"), ("photo", url)]
+  httpLbs (urlEncodedBody body initRequest) manager
 
 
-storeCat :: String -> String -> IO ()
+storeCat :: T.Text -> T.Text -> IO ()
 storeCat catId url = do
   conn <- open "data/cats.db"
   date <- getCurrentTime
   execute conn "INSERT INTO cats (id, url, date_added) VALUES (?, ?, ?)" (catId, url, date)
 
 
-checkForEntry :: String -> IO Bool
+checkForEntry :: T.Text -> IO Bool
 checkForEntry catId = do
   conn <- open "data/cats.db"
-  result <- query conn "SELECT id FROM cats WHERE id = ?" (Only catId) :: IO [Only String]
+  result <- query conn "SELECT id FROM cats WHERE id = ?" (Only catId) :: IO [Only T.Text]
   pure . not . null $ result
 
 
-handleCat :: String -> Cat -> IO ()
+-- TODO: do not simply call main again
+handleCat :: B.ByteString -> Cat -> IO ()
 handleCat token (Cat catId catUrl) = do
   isInData <- checkForEntry catId
   if isInData then main
-  else sendPhoto token catUrl >> storeCat catId catUrl
+  else sendPhoto token (encodeUtf8 catUrl) >> storeCat catId catUrl
 
 
+-- manager is created twice (sendPhoto); maybe use Reader Monad?
 main :: IO ()
 main = do
   token <- readToken
-  response <- httpLBS "https://api.thecatapi.com/v1/images/search"
-  let catResponse = decode $ getResponseBody response
+  manager <- newOpenSSLManager
+  response <- httpLbs "https://api.thecatapi.com/v1/images/search" manager
+  let catResponse = decode $ responseBody response
 
   case catResponse of
     Just (cat:_) -> handleCat token cat
     _ -> pure ()
+

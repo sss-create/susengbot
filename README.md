@@ -19,16 +19,7 @@ url text,
 date_added DATETIME default current_timestamp);
 ```
 
-compile and add a cronjob for a daily picture:
+compile using ```cabal build```, move the executable and add a cronjob for a daily picture:
 ```
 16 11 * * * cd susengbot && ./susengbot
-```
-
-Developed/Tested with:
-```
-ghc 9.4.5
-cabal 3.6.2.0
-SQLite 3.40.1-2 
-zlib1g-dev version 1:1.2.13
-gcc-12.2.0-14
 ```

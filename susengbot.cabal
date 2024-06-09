@@ -1,28 +1,24 @@
-cabal-version: 1.12
+cabal-version: 3.0
 
 name:           susengbot
-version:        0.1.0.0
-homepage:       https://github.com/githubuser/susengbot#readme
+version:        0.1.1.0
 author:         Sven Miesner
-maintainer:     example@example.com
-copyright:      2023 Sven Miesner
-license:        BSD3
+license:        BSD-3-Clause
 license-file:   LICENSE
 build-type:     Simple
 extra-source-files: README.md
 
 executable susengbot
   main-is: Main.hs
-  hs-source-dirs:
-      app
+  ghc-options: -O2 -threaded
+  hs-source-dirs: app
   build-depends:
-      aeson
-    , base
+      base ^>=4.19.1.0
     , bytestring
+    , text
+    , microaeson
     , http-client
-    , http-client-tls
-    , http-conduit
+    , http-client-openssl
     , sqlite-simple
     , time
-    , utf8-string
   default-language: Haskell2010
